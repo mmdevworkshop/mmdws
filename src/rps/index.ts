@@ -1,4 +1,4 @@
-const {basename, relative} = require('node:path');
+import { basename, relative } from 'node:path';
 
 function pickOne(arr) {
     const choice = Math.floor(Math.random() * arr.length);
