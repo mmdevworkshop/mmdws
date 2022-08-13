@@ -9,7 +9,7 @@
         "outDir": "dist",
         "declaration": true,
         "rootDir": "src",
-        
+
         // lint settings
         "strict": true,
         "allowUnreachableCode": false,
@@ -23,9 +23,9 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strictNullChecks": false, // enable later
+        "strictNullChecks": false // enable later
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules", "types", "dist"],
-    "typeRoots": ["types", "./node_modules/@types"],
+    "typeRoots": ["types", "./node_modules/@types"]
 }
