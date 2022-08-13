@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "rps": "tsc && node dist/rps/index.js"
+    "rps": "tsc && node dist/rps/index.js",
+    "ts-node": "ts-node.cmd"
   },
   "repository": {
     "type": "git",
