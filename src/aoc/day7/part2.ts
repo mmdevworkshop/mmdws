@@ -6,44 +6,81 @@ const vals = readLines(__dirname, 'input.txt')[0]
 
 vals.sort((a, b) => a - b);
 
-function fuelCost(arr: number[], pos: number): number {
-  return arr
-    .map((v) => {
-      const distance = Math.abs(v - pos);
-      return (distance * (distance + 1)) / 2;
-    })
-    .reduce((a, b) => a + b);
+const enum Direction {
+  LEFT = -1,
+  RIGHT = 1,
 }
 
-let pos = vals[Math.floor(vals.length / 2)]; // initial guess
-let cost = fuelCost(vals, pos);
+class FuelTracker {
+  readonly crabs: number[];
+  idx: number;
+  pos: number;
+  direction: Direction;
 
-let left = fuelCost(vals, pos - 1);
-let right = fuelCost(vals, pos + 1);
+  fuelSpent: number = 0;
+  acc: number = 0;
+  crabsHere: number = 0;
+  crabsPassed: number = 0;
 
-let dir: number;
-if (cost < left && cost < right) {
-  // not really going to receive data that hits this case...
-  console.log(pos, cost);
-  process.exit();
-} else if (left < cost) {
-  dir = -1;
-} else if (right < cost) {
-  dir = 1;
-}
+  constructor(crabs: number[], direction: Direction) {
+    this.crabs = crabs;
+    this.idx = direction > 0 ? 0 : crabs.length - 1;
+    this.pos = crabs[this.idx];
+    this.direction = direction;
 
-while (true) {
-  if (pos + dir === vals.length || pos + dir < 0) {
-    throw new Error('unexpectedly ran off the end of the array');
+    this._countHere();
   }
 
-  let newCost = fuelCost(vals, pos + dir);
-  if (newCost >= cost) {
-    break;
+  _countHere() {
+    while (
+      this.idx >= 0 &&
+      this.idx < this.crabs.length &&
+      this.crabs[this.idx] === this.pos
+    ) {
+      this.idx += this.direction;
+      this.crabsHere++;
+    }
   }
 
-  cost = newCost;
-  pos = pos + dir;
+  fuelStep(): number {
+    // we have to "move the one that increases the sum of spent fuel the least",
+    // so we need a "hypothetical" fuel cost calculation before actually invoking
+    // "move"
+
+    const crabsPassed = this.crabsPassed + this.crabsHere;
+    return this.acc + crabsPassed;
+  }
+
+  move(): number {
+    // we just increased position, so if there
+    // were any crabs at the last location, we
+    // increase the amount of fuel we spend by
+    // one per crab
+    if (this.crabsHere > 0) {
+      this.crabsPassed += this.crabsHere;
+      this.crabsHere = 0;
+    }
+
+    this.acc += this.crabsPassed;
+    this.fuelSpent += this.acc;
+
+    this.pos += this.direction;
+    this._countHere();
+
+    return this.fuelSpent;
+  }
 }
 
-console.log(pos, cost);
+const goingRight = new FuelTracker(vals, Direction.RIGHT);
+const goingLeft = new FuelTracker(vals, Direction.LEFT);
+
+while (goingLeft.pos !== goingRight.pos) {
+  const leftMoveCost = goingLeft.fuelStep();
+  const rightMoveCost = goingRight.fuelStep();
+  if (leftMoveCost < rightMoveCost) {
+    goingLeft.move();
+  } else {
+    goingRight.move();
+  }
+}
+console.log(goingLeft.fuelSpent + goingRight.fuelSpent);
